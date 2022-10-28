@@ -28,7 +28,7 @@ The *SCO Diagnostic Tool* allows you to collect diagnostic logs from your Orches
 
 ## Notes:
 
-- The script won't make any change in the SCSM environment.
+- The script won't make any change in the SCO environment.
 - The script can be also used as a Health Checker. 
 
 ## Do you want to contribute to this tool?

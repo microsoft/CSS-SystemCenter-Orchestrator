@@ -1,6 +1,6 @@
 # SCO Diagnostic Tool
 
-Download the latest release:  [MS_Support_Collect_ORC_v1.0.0.4.ps1]({{ site.latestDownloadLink }}/MS_Support_Collect_ORC_v1.0.0.4.ps1)
+Download the latest release:  [MS_Support_Collect_ORC_v1.0.0.5.ps1]({{ site.latestDownloadLink }}/MS_Support_Collect_ORC_v1.0.0.5.ps1)
 
 ## Description
 

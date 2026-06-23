@@ -446,6 +446,7 @@ function exportMSInfo32 {
 
     AppendOutputToFileInTargetFolder ( (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1mb ) TotalRAM.txt
 
+    AppendOutputToFileInTargetFolder( Get-WmiObject -class win32_ReliabilityRecords | Select ProductName , User, TimeGenerated , Message | Sort TimeGenerated -Descending | FT -Autosize | Out-String -Width 9999 ) "Installed Updates.txt"
 	return $msinfo32
 }
 
@@ -721,6 +722,28 @@ GROUP BY database_name, type
 ORDER BY database_name, type
 '@
 
+    $SQL_Queries['SQL_sp_Microsoft.SystemCenter.Orchestrator.Runtime.Internal.CreateJob'] = @'
+SELECT OBJECT_DEFINITION (OBJECT_ID(N'[Microsoft.SystemCenter.Orchestrator.Runtime.Internal].[CreateJob]'))  
+'@
+
+    $SQL_Queries['SQL_sp_Microsoft.SystemCenter.Orchestrator.Runtime.Internal.CompleteJob'] = @'
+SELECT OBJECT_DEFINITION (OBJECT_ID(N'[Microsoft.SystemCenter.Orchestrator.Runtime.Internal].[CompleteJob]'))   
+'@
+
+    $SQL_Queries['SQL_sp_Microsoft.SystemCenter.Orchestrator.Runtime.Internal.CancelRunbook'] = @'
+SELECT OBJECT_DEFINITION (OBJECT_ID(N'[Microsoft.SystemCenter.Orchestrator.Runtime.Internal].[CancelRunbook]'))  
+'@
+
+    $SQL_Queries['SQL_sp_Microsoft.SystemCenter.Orchestrator.Cryptography.CreateOrchestratorKeys'] = @'
+SELECT OBJECT_DEFINITION (OBJECT_ID(N'[Microsoft.SystemCenter.Orchestrator.Cryptography].[CreateOrchestratorKeys]'));  
+'@
+
+    $SQL_Queries['SQL_sp_Microsoft.SystemCenter.Orchestrator.Cryptography.DropOrchestratorKeys'] = @'
+SELECT OBJECT_DEFINITION (OBJECT_ID(N'[Microsoft.SystemCenter.Orchestrator.Cryptography].[DropOrchestratorKeys]'));  
+'@
+
+
+
     foreach($SQL_Query in $SQL_Queries.Keys) {        
 	    SaveSQLResultSetsToFiles $SQLInstance $SQLDatabase ($SQL_Queries[$SQL_Query]) "$SQL_Query.csv"    
 	} 	
@@ -761,6 +784,17 @@ function exportIISsettings{
 	
 }
 
+function exportConfigFiles {
+    try{
+        #for WebAPI
+        CopyFileToTargetFolder "$env:SystemDrive\Program Files\Microsoft System Center\Orchestrator\WebApi\web.config" ".\"
+        #for WebConsole
+        CopyFileToTargetFolder "$env:SystemDrive\Program Files\Microsoft System Center\Orchestrator\WebConsole\assets\configuration.json" ".\"
+    }catch{
+		"Error in exportConfigFiles + $_.Exception " 
+	} 
+}
+
 
 function loadOrchDB{
 	try {
@@ -791,7 +825,6 @@ function loadOrchDB{
 	catch
 	{
 		"Error decrypting settings.dat file: Error Exception is + $_.Exception " 
-		   Throw $_.Exception 
 	} 
 }
 
@@ -812,6 +845,7 @@ function loadOrchDB{
 
     Write-Host "_______________________________________"
   
+    
     Write-Host "Gathering Registry Keys on local server..." -ForegroundColor Cyan
     exportRegKeys
     Write-Host "Gathering EventLog on local server..." -ForegroundColor Cyan
@@ -822,7 +856,9 @@ function loadOrchDB{
     getProcesses
     Write-Host "Exporting MSInfo32 on local server..." -ForegroundColor Cyan
     $msinfo32 = exportMSInfo32
-	Write-Host "Exporting IIS settings on local server..." -ForegroundColor Cyan
+    Write-Host "Exporting WebAPi and WebConsole config files..." -ForegroundColor Cyan 
+    exportConfigFiles
+    Write-Host "Exporting IIS settings on local server..." -ForegroundColor Cyan
 	exportIISsettings
     Write-Host "Getting automatic SQL Server connection info" -ForegroundColor Cyan	
     $array = loadOrchDB
@@ -875,4 +911,3 @@ function loadOrchDB{
 		  
 		start (join-path $env:Windir explorer.exe) -ArgumentList "/select, ""$resultingZipFile_FullPath"""
 	}
-		

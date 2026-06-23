@@ -780,7 +780,7 @@ function loadOrchDB{
 
 		$xmlDoc = [System.Xml.XmlDocument]::new()
 		$xmlDoc.LoadXml($decryptedText)
-		$SQLInstance = $xmlDoc.Configuration.Server
+		$SQLInstance = $xmlDoc.Configuration.Server # TODO: check if contains other thing(s) than SQL instance name, e.g. SQL123\TESTSCORCH;Trust Server Certificate=true
 		$SQLDatabase = $xmlDoc.Configuration.Database
 		
         $myArray = @()
